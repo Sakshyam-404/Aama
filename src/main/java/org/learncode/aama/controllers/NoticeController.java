@@ -14,8 +14,8 @@ public class NoticeController {
     private noticeService service;
 
     @PostMapping("/create-notice")
-    public List<Notice> postNotice(@RequestBody Notice notice){
-        Notice notice1 = service.createNotice(notice);
+    public List<Notice> postNotice(@RequestBody Notice notice,String name){
+        Notice notice1 = service.createNotice(notice,name);
         return List.of(notice1);
 
     }

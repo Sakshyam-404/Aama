@@ -21,7 +21,9 @@ public class noticeService {
     private UserRepo userRepo;
 
 
-    public Notice createNotice(Notice notice){
+    public Notice createNotice(Notice notice, String name){
+        Users user = userRepo.findUsersByName(name);
+        notice.setNoticeCreator(name);
         Notice save = noticeRepo.save(notice);
         List<Users> allUsers = userRepo.findAll();
         List<NotificationReceipent> receipents= new ArrayList<>();
@@ -45,6 +47,7 @@ public class noticeService {
             notice.setNotice_id(n.getNotice().getNotice_id());
             notice.setType(n.getNotice().getType());
             notice.setPurpose(n.getNotice().getPurpose());
+            notice.setNoticeCreator(n.getNotice().getNoticeCreator());
             notices.add(notice);
         }
         return notices;

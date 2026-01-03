@@ -14,5 +14,6 @@ public class Notice {
     private String type;
     @Column(length=500)
     private String purpose;
+    private String noticeCreator;
 
 }

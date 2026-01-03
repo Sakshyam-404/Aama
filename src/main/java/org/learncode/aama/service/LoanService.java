@@ -1,13 +1,10 @@
 package org.learncode.aama.service;
-
-import org.aspectj.weaver.ast.Not;
 import org.learncode.aama.Dao.*;
 import org.learncode.aama.entites.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
+
 import java.util.Optional;
 
 @Service
@@ -29,19 +26,24 @@ public class LoanService {
         Notice notice= new Notice();
         notice.setType("Loan Request for Rs"+loanRequest.getAmount());
         notice.setPurpose(loanRequest.getPurpose()+"  Status : "+loanRequest.getStatus());
+        notice.setNoticeCreator(users.getName());
         return notice;
 
     }
 
-    public Notice approve(Long loanId,Long adminId){
+    public Notice approve(String name,Long adminId){
         Users admin = userRepo.getById(adminId);
         if(admin.getRole().equals("ADMIN")){
-            Optional<LoanRequest> loanreq = loanRequestRepo.findById(loanId);
-            LoanRequest loanRequest = loanreq.get();
-            Notice noticeByPurpose = noticeRepo.getNoticeByPurpose(loanRequest.getPurpose() + "  Status : " + loanRequest.getStatus());
-            loanRequest.setStatus("Approved");
-            loanRequestRepo.save(loanRequest);
-            noticeByPurpose.setPurpose(loanRequest.getPurpose() + "  Status : " + loanRequest.getStatus());
+            Users user = userRepo.findUsersByName(name);
+            LoanRequest loanrequest = loanRequestRepo.findByUsers_UserID(user.getUserID());
+            Notice noticeByPurpose = noticeRepo.getNoticeByPurpose(loanrequest.getPurpose() + "  Status : " + loanrequest.getStatus());
+            loanrequest.setStatus("Approved");
+            loanRequestRepo.save(loanrequest);
+            Loan loan= new Loan();
+            loan.setPrincipal(loanrequest.getAmount());
+            loan.setUsers(loanrequest.getUsers());
+            loan.setStatus("ACTIVE");
+            noticeByPurpose.setPurpose(loanrequest.getPurpose() + "  Status : " + loanrequest.getStatus());
             Notice save = noticeRepo.save(noticeByPurpose);
             return save;
 
@@ -50,22 +52,17 @@ public class LoanService {
             System.out.println("Only admin can approve request");
             return null;
         }
-
-
-
-
-
     }
 
-    public Notice reject(Long loanId,Long adminId){
+    public Notice reject(String name,Long adminId){
         Users admin = userRepo.getById(adminId);
         if(admin.getRole().equals("ADMIN")){
-            Optional<LoanRequest> loanreq = loanRequestRepo.findById(loanId);
-            LoanRequest loanRequest = loanreq.get();
-            Notice noticeByPurpose = noticeRepo.getNoticeByPurpose(loanRequest.getPurpose() + "  Status : " + loanRequest.getStatus());
-            loanRequest.setStatus("Rejected");
-            loanRequestRepo.save(loanRequest);
-            noticeByPurpose.setPurpose(loanRequest.getPurpose() + "  Status : " + loanRequest.getStatus());
+            Users user = userRepo.findUsersByName(name);
+            LoanRequest loanrequest = loanRequestRepo.findByUsers_UserID(user.getUserID());
+            Notice noticeByPurpose = noticeRepo.getNoticeByPurpose(loanrequest.getPurpose() + "  Status : " + loanrequest.getStatus());
+            loanrequest.setStatus("Rejected");
+            loanRequestRepo.save(loanrequest);
+            noticeByPurpose.setPurpose(loanrequest.getPurpose() + "  Status : " + loanrequest.getStatus());
             Notice save = noticeRepo.save(noticeByPurpose);
             return save;
         }

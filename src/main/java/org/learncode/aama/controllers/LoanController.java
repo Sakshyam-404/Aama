@@ -18,21 +18,22 @@ public class LoanController {
     public Notice createLoanRequest(@RequestBody LoanRequest loanRequest, @PathVariable("id") Long id){
 
         Notice loan = loanService.createLoan(id, loanRequest);
-        Notice notice = noticeService.createNotice(loan);
+
+        Notice notice = noticeService.createNotice(loan,loanRequest.getUsers().getName());
         return notice;
     }
-    @PostMapping("/approve/{loanid}")
+    @PostMapping("/approve/{name}")
 
-    public Notice approveLoan(@PathVariable("loanid") Long loanid, @RequestParam("adminid") Long adminId){
+    public Notice approveLoan(@PathVariable("name") String name, @RequestParam("adminid") Long adminId){
         adminId=1L;
-        Notice approve = loanService.approve(loanid, adminId);
+        Notice approve = loanService.approve(name, adminId);
         return approve;
 
     }
     @PostMapping("/reject/{loanid}")
-    public String rejectLoan(@PathVariable("loanid") Long loanid, @RequestParam("adminid") Long adminId){
+    public String rejectLoan(@PathVariable("name") String name, @RequestParam("adminid") Long adminId){
         adminId=1L;
-        loanService.reject(loanid, adminId);
+        loanService.reject(name, adminId);
         return "Loan rejected";
 
     }
