@@ -1,10 +1,7 @@
 package org.learncode.aama.controllers;
 
 import org.learncode.aama.Dao.LoanRequestRepo;
-import org.learncode.aama.entites.LoanRequest;
-import org.learncode.aama.entites.Notice;
-import org.learncode.aama.entites.UserPrincipal;
-import org.learncode.aama.entites.Users;
+import org.learncode.aama.entites.*;
 import org.learncode.aama.service.LoanService;
 import org.learncode.aama.service.noticeService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -91,6 +88,35 @@ public class LoanController {
         }
 
         return loanService.getAllLoanRequests();
+    }
+    // Add to LoanController.java
+
+    @GetMapping("admin/loans/active")
+    @PreAuthorize("hasRole('ADMIN')")
+    public List<Loan> getAllActiveLoans() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        UserPrincipal principal = (UserPrincipal) auth.getPrincipal();
+        Users admin = principal.getUser();
+
+        if (!admin.getRole().equalsIgnoreCase("ADMIN")) {
+            throw new RuntimeException("Only admins can view all active loans");
+        }
+
+        return loanService.getAllActiveLoans();
+    }
+
+    @GetMapping("admin/loan-history")
+    @PreAuthorize("hasRole('ADMIN')")
+    public List<LoanRequest> getLoanHistory() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        UserPrincipal principal = (UserPrincipal) auth.getPrincipal();
+        Users admin = principal.getUser();
+
+        if (!admin.getRole().equalsIgnoreCase("ADMIN")) {
+            throw new RuntimeException("Only admins can view loan history");
+        }
+
+        return loanService.getLoanHistory();
     }
 
 

@@ -100,4 +100,18 @@ public class LoanService {
         List<LoanRequest> all = loanRequestRepo.findAll();
         return all;
     }
+    // Add to LoanService.java
+
+    public List<Loan> getAllActiveLoans() {
+        return loanRepo.findAll().stream()
+                .filter(loan -> "ACTIVE".equals(loan.getStatus()))
+                .collect(java.util.stream.Collectors.toList());
+    }
+
+    public List<LoanRequest> getLoanHistory() {
+        // Get all loan requests that are not pending (approved or rejected)
+        return loanRequestRepo.findAll().stream()
+                .filter(lr -> !"pending".equalsIgnoreCase(lr.getStatus()))
+                .collect(java.util.stream.Collectors.toList());
+    }
 }

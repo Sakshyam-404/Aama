@@ -1,5 +1,6 @@
 package org.learncode.aama.entites;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -18,7 +19,8 @@ public class LoanRequest {
     private LocalDate createdAt=LocalDate.now();
     private String status="pending";
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.EAGER)
+    @JsonManagedReference
     private Users users;
 
 }
