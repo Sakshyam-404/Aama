@@ -59,6 +59,7 @@ public class LoanService {
             loan.setUsers(loanRequest.getUsers());
             loanRepo.save(loan);
             noticeByPurpose.setPurpose(loanRequest.getPurpose() + "  Status : " + loanRequest.getStatus());
+            noticeByPurpose.setLoanid(loan.getId());
             Notice save = noticeRepo.save(noticeByPurpose);
             return save;
 
