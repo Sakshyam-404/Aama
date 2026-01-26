@@ -1,10 +1,9 @@
 package org.learncode.aama.controllers;
 
-import jakarta.servlet.http.HttpSession;
 import org.learncode.aama.Dao.LoanRepo;
 import org.learncode.aama.Dao.UserRepo;
+import org.learncode.aama.Dto.MemberDashboardDto;
 import org.learncode.aama.Dto.userDto;
-import org.learncode.aama.entites.Loan;
 import org.learncode.aama.entites.UserPrincipal;
 import org.learncode.aama.entites.Users;
 import org.learncode.aama.service.jwtService;
@@ -12,11 +11,9 @@ import org.learncode.aama.service.userService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -67,6 +64,8 @@ public class Usercontroller {
                 HashMap<String, String> response = new HashMap<>();
                 response.put("token", token);
                 response.put("message", "Login successful");
+                response.put("role", user.getRole());
+                response.put("name", user.getName());
 
                 return ResponseEntity.ok(response);
             } else {
@@ -77,19 +76,14 @@ public class Usercontroller {
         }
     }
     @GetMapping("/dashboard")
-    public Users dashboard(Model model) {
+    public MemberDashboardDto dashboard() {
         // Get authenticated user from JWT
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         UserPrincipal principal = (UserPrincipal) auth.getPrincipal();
         Users user = principal.getUser();
 
-        // Get active loan for this user
-        Loan loan = loanRepo.findLoansByUsers_UserID(user.getUserID());
-        if (loan != null && "ACTIVE".equals(loan.getStatus())) {
-            model.addAttribute("loan", loan);
-        }
-
-        return user;
+        // Return user's dashboard stats
+        return UserService.getMemberDashboardStats(user.getUserID());
     }
 
 }

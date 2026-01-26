@@ -35,6 +35,6 @@ public class Users {
     private LoanRequest loanRequest;
 
     @OneToMany(mappedBy = "users", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    @JsonIgnore  // ADD THIS - prevents circular reference
+    @JsonIgnore
     private List<Loan> loan=new ArrayList<>();
 }
