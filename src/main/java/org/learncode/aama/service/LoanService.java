@@ -132,6 +132,7 @@ public class LoanService {
         Users admin = userRepo.findById(adminId)
                 .orElseThrow(() -> new IllegalArgumentException("Admin not found"));
 
+
         if (!"ADMIN".equalsIgnoreCase(admin.getRole())) {
             throw new RuntimeException("Only admins can mark loans as paid");
         }
@@ -158,16 +159,19 @@ public class LoanService {
                 .findFirst()
                 .orElseThrow(() -> new IllegalStateException("No approved loan request found for this loan"));
 
+
         // Update loan status
         loan.setStatus("PAID");
         loan.setRemainingBalance(0.0);
+        //update noptice
+        String oldPurpose = loanRequest.getPurpose() + "  Status : " + loanRequest.getStatus();
+        Notice noticeByPurpose = noticeRepo.getNoticeByPurpose(oldPurpose);
 
         // Update loan request status
         loanRequest.setStatus("PAID");
 
         // Update notice
-        String oldPurpose = loanRequest.getPurpose() + "  Status : " + loanRequest.getStatus();
-        Notice noticeByPurpose = noticeRepo.getNoticeByPurpose(oldPurpose);
+
         if (noticeByPurpose != null) {
             noticeByPurpose.setPurpose(loanRequest.getPurpose() + "  Status : " + loanRequest.getStatus());
             noticeRepo.save(noticeByPurpose);
