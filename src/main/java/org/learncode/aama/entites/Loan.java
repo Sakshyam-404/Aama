@@ -16,7 +16,7 @@ public class Loan {
     private Long id;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JsonIgnoreProperties({"loan", "deposit", "loanRequest", "password"})  // Include user but ignore circular fields
+    @JsonIgnoreProperties({"loan", "deposit", "loanRequests", "password"})  // Changed loanRequest to loanRequests
     private Users users;
 
     private Double principal;

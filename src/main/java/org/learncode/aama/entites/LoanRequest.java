@@ -1,6 +1,6 @@
 package org.learncode.aama.entites;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -19,8 +19,8 @@ public class LoanRequest {
     private LocalDate createdAt=LocalDate.now();
     private String status="pending";
 
-    @OneToOne(fetch = FetchType.EAGER)
-    @JsonManagedReference
+    // CHANGE: OneToOne -> ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "user_id")
     private Users users;
-
 }

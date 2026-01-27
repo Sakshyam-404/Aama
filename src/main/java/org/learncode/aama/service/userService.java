@@ -40,7 +40,23 @@ public class userService {
                 .filter(loan -> "ACTIVE".equals(loan.getStatus()))
                 .collect(Collectors.toList());
 
-        LoanRequest loanRequest = user.getLoanRequest();
+        // Get the most recent loan request (prefer pending, then most recent)
+        List<LoanRequest> loanRequests = user.getLoanRequests();
+        LoanRequest loanRequest = null;
+        if (loanRequests != null && !loanRequests.isEmpty()) {
+            // First try to find a pending one
+            loanRequest = loanRequests.stream()
+                    .filter(lr -> "pending".equalsIgnoreCase(lr.getStatus()))
+                    .findFirst()
+                    .orElse(null);
+
+            // If no pending, get the most recent one
+            if (loanRequest == null) {
+                loanRequest = loanRequests.stream()
+                        .max((lr1, lr2) -> lr1.getCreatedAt().compareTo(lr2.getCreatedAt()))
+                        .orElse(null);
+            }
+        }
 
         // Handle empty loans safely
         Loan firstLoan = activeLoans.isEmpty() ? null : activeLoans.get(0);

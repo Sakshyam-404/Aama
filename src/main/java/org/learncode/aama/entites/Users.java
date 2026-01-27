@@ -1,7 +1,7 @@
 package org.learncode.aama.entites;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIgnore;  // ADD THIS
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -30,9 +30,10 @@ public class Users {
     @JsonManagedReference
     private List<Deposit> deposit=new ArrayList<>();
 
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "users")
-    @JsonBackReference
-    private LoanRequest loanRequest;
+    // CHANGE: OneToOne -> OneToMany to keep history
+    @OneToMany(mappedBy = "users", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @JsonIgnore
+    private List<LoanRequest> loanRequests = new ArrayList<>();
 
     @OneToMany(mappedBy = "users", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JsonIgnore

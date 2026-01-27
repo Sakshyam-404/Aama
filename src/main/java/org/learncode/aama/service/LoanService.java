@@ -28,34 +28,22 @@ public class LoanService {
         Users users = userRepo.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
-        // Use the OneToOne relationship to check if user has a PENDING loan request
-        LoanRequest existingLoanRequest = users.getLoanRequest();
+        // Check if user has any PENDING loan request using the OneToMany relationship
+        boolean hasPendingRequest = users.getLoanRequests().stream()
+                .anyMatch(lr -> "pending".equalsIgnoreCase(lr.getStatus()));
 
-        if (existingLoanRequest != null && "pending".equalsIgnoreCase(existingLoanRequest.getStatus())) {
+        if (hasPendingRequest) {
             throw new IllegalStateException("User already has a pending loan request. Please wait for approval or rejection.");
         }
 
-        LoanRequest savedLoanRequest;
+        // Create a new loan request (we keep all history now)
+        loanRequest.setUsers(users);
+        loanRequest.setStatus("pending");
+        LoanRequest savedLoanRequest = loanRequestRepo.save(loanRequest);
 
-        // If existing loan request is not pending (Approved, Rejected, or PAID),
-        // UPDATE it instead of creating a new one (due to OneToOne unique constraint)
-        if (existingLoanRequest != null) {
-            // Update the existing loan request with new values
-            existingLoanRequest.setAmount(loanRequest.getAmount());
-            existingLoanRequest.setPurpose(loanRequest.getPurpose());
-            existingLoanRequest.setStatus("pending");
-            existingLoanRequest.setCreatedAt(LocalDate.now()); // Update creation date
-            savedLoanRequest = loanRequestRepo.save(existingLoanRequest);
-        } else {
-            // No existing loan request, create a new one
-            loanRequest.setUsers(users);
-            loanRequest.setStatus("pending");
-            savedLoanRequest = loanRequestRepo.save(loanRequest);
-
-            // Update the user's loanRequest reference
-            users.setLoanRequest(savedLoanRequest);
-            userRepo.save(users);
-        }
+        // Add to user's list (optional, but keeps relationship in sync)
+        users.getLoanRequests().add(savedLoanRequest);
+        userRepo.save(users);
 
         // Create a notice
         Notice notice = new Notice();
@@ -121,9 +109,21 @@ public class LoanService {
     }
 
     public List<LoanRequest> getLoanHistory() {
-        // Get all loan requests that are not pending (approved or rejected)
+        // Get all loan requests that are not pending (approved, rejected, or paid)
         return loanRequestRepo.findAll().stream()
                 .filter(lr -> !"pending".equalsIgnoreCase(lr.getStatus()))
+                .collect(java.util.stream.Collectors.toList());
+    }
+
+    // ADD THIS: Get loan history for a specific member
+    public List<LoanRequest> getMemberLoanHistory(Long userId) {
+        Users user = userRepo.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        // Return all loan requests for this user (excluding pending ones)
+        return user.getLoanRequests().stream()
+                .filter(lr -> !"pending".equalsIgnoreCase(lr.getStatus()))
+                .sorted((lr1, lr2) -> lr2.getCreatedAt().compareTo(lr1.getCreatedAt())) // Most recent first
                 .collect(java.util.stream.Collectors.toList());
     }
 
@@ -149,18 +149,14 @@ public class LoanService {
             throw new IllegalStateException("Loan is already marked as paid");
         }
 
-        // Use the OneToOne relationship to get the loan request
+        // Find the LoanRequest that matches this loan (by user and amount)
         Users loanUser = loan.getUsers();
-        LoanRequest loanRequest = loanUser.getLoanRequest();
-
-        if (loanRequest == null) {
-            throw new IllegalStateException("No loan request found for this loan");
-        }
-
-        // Check if loan request is already paid
-        if ("PAID".equalsIgnoreCase(loanRequest.getStatus())) {
-            throw new IllegalStateException("Loan request is already marked as paid");
-        }
+        LoanRequest loanRequest = loanUser.getLoanRequests().stream()
+                .filter(lr -> "Approved".equalsIgnoreCase(lr.getStatus())
+                        && lr.getAmount().equals(loan.getPrincipal())
+                        && !"PAID".equalsIgnoreCase(lr.getStatus()))
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException("No approved loan request found for this loan"));
 
         // Update loan status
         loan.setStatus("PAID");
@@ -182,7 +178,6 @@ public class LoanService {
         return loanRepo.save(loan);
     }
 
-    // Add this method for loan history (includes PAID loans)
     public List<Loan> getAllLoans() {
         return loanRepo.findAll();
     }

@@ -147,6 +147,15 @@ public class LoanController {
 
         return loanService.getAllLoans();
     }
+    @GetMapping("/my-loan-history")
+    public List<LoanRequest> getMyLoanHistory() {
+        // Get authenticated user from JWT
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        UserPrincipal principal = (UserPrincipal) auth.getPrincipal();
+        Users user = principal.getUser();
+
+        return loanService.getMemberLoanHistory(user.getUserID());
+    }
 
 
 }
