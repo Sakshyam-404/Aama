@@ -30,7 +30,7 @@ public class Users {
     @JsonManagedReference
     private List<Deposit> deposit=new ArrayList<>();
 
-    // CHANGE: OneToOne -> OneToMany to keep history
+
     @OneToMany(mappedBy = "users", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JsonIgnore
     private List<LoanRequest> loanRequests = new ArrayList<>();
@@ -38,4 +38,7 @@ public class Users {
     @OneToMany(mappedBy = "users", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JsonIgnore
     private List<Loan> loan=new ArrayList<>();
+
+    @OneToOne(mappedBy = "users", fetch = FetchType.EAGER)
+    private BudgetTransaction budgetTransaction;
 }

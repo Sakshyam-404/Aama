@@ -22,6 +22,8 @@ public class LoanService {
     private UserRepo userRepo;
     @Autowired
     private NoticeRepo noticeRepo;
+    @Autowired
+    private DepositService depositService;
 
     @Transactional
     public Notice createLoan(Long userId, LoanRequest loanRequest){
@@ -70,7 +72,9 @@ public class LoanService {
             noticeByPurpose.setPurpose(loanRequest.getPurpose() + "  Status : " + loanRequest.getStatus());
             noticeByPurpose.setLoanid(loan.getId());
             Notice save = noticeRepo.save(noticeByPurpose);
+            depositService.manageLoanrequest(admin.getUserID(),loanRequest.getAmount());
             return save;
+
 
         }
         else{
@@ -179,6 +183,7 @@ public class LoanService {
 
         // Save both
         loanRequestRepo.save(loanRequest);
+        depositService.manageLoanrequestforpaid(admin.getUserID(),loanRequest.getAmount());
         return loanRepo.save(loan);
     }
 

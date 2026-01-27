@@ -1,7 +1,9 @@
 package org.learncode.aama.controllers;
 
 import org.learncode.aama.Dao.LoanRequestRepo;
+import org.learncode.aama.Dao.budgetRepo;
 import org.learncode.aama.entites.*;
+import org.learncode.aama.service.DepositService;
 import org.learncode.aama.service.LoanService;
 import org.learncode.aama.service.noticeService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +27,9 @@ public class LoanController {
 
     @Autowired
     private LoanRequestRepo loanRequestRepo;
+
+    @Autowired
+    private DepositService depositService;
 
 
     @PostMapping("/loan-request")
@@ -54,7 +59,10 @@ public class LoanController {
             throw new RuntimeException("Only admins can approve loans");
         }
 
+
+
         return loanService.approve(loanId, admin.getUserID());
+
     }
 
 
