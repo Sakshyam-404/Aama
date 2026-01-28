@@ -2,9 +2,7 @@ package org.learncode.aama.controllers;
 
 import org.learncode.aama.Dao.LoanRepo;
 import org.learncode.aama.Dao.UserRepo;
-import org.learncode.aama.Dto.ContactResponseDto;
-import org.learncode.aama.Dto.MemberDashboardDto;
-import org.learncode.aama.Dto.userDto;
+import org.learncode.aama.Dto.*;
 import org.learncode.aama.entites.UserPrincipal;
 import org.learncode.aama.entites.Users;
 import org.learncode.aama.service.jwtService;
@@ -17,7 +15,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
-import org.learncode.aama.Dto.ContactDto;
 
 import java.util.HashMap;
 import java.util.List;
@@ -95,6 +92,12 @@ public class Usercontroller {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         UserPrincipal principal = (UserPrincipal) auth.getPrincipal();
         return UserService.getAllContacts(principal.getUser().getUserID());
+    }
+    @GetMapping("/member-contacts")
+    public List<ContactFMemDto> getContactsformem() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        UserPrincipal principal = (UserPrincipal) auth.getPrincipal();
+        return UserService.getAllContactsFormem(principal.getUser().getUserID());
     }
 
 }

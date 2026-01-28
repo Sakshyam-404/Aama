@@ -4,6 +4,7 @@ import org.learncode.aama.Dao.DepositRepo;
 import org.learncode.aama.Dao.LoanRepo;
 import org.learncode.aama.Dao.UserRepo;
 import org.learncode.aama.Dto.ContactDto;
+import org.learncode.aama.Dto.ContactFMemDto;
 import org.learncode.aama.Dto.ContactResponseDto;
 import org.learncode.aama.Dto.MemberDashboardDto;
 import org.learncode.aama.entites.Loan;
@@ -120,4 +121,19 @@ public class userService {
                 return new ContactResponseDto(contacts.size(),contacts);
         }
 
+        public List<ContactFMemDto> getAllContactsFormem(Long userID) {
+                List<Users> allUsers = userDao.findAll();
+
+                return allUsers.stream()
+                        .filter(users -> !users.getUserID().equals(userID))
+                        .map(users -> new ContactFMemDto(
+                                users.getUserID(),
+                                users.getName(),
+                                users.getPhonenumber(),
+                                users.getLoan().size(),
+                                users.getRole()
+                        ))
+                        .collect(Collectors.toList());
+
+        }
 }
