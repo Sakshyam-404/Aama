@@ -7,6 +7,7 @@ import org.learncode.aama.Dto.ContactDto;
 import org.learncode.aama.Dto.ContactFMemDto;
 import org.learncode.aama.Dto.ContactResponseDto;
 import org.learncode.aama.Dto.MemberDashboardDto;
+import org.learncode.aama.entites.Deposit;
 import org.learncode.aama.entites.Loan;
 import org.learncode.aama.entites.LoanRequest;
 import org.learncode.aama.entites.Users;
@@ -86,6 +87,8 @@ public class userService {
                 Integer durationMonths = firstLoan != null ? firstLoan.getDurationMonths() : null;
                 LocalDateTime startdate = firstLoan != null ? firstLoan.getStartDate() : null;
                 Double totalpayableamt = firstLoan != null ? firstLoan.getTotalPayable() : null;
+                List<Deposit> deposits = depositRepo.getDepositsByUsersUserID(userId) !=null ? depositRepo.getDepositsByUsersUserID(userId) :null;
+                List<Loan> loans= loanRepo.findByUsers_UserID(userId) !=null ? loanRepo.findByUsers_UserID(userId) : null;
 
                 return new MemberDashboardDto(
                                 user.getUserID(),
@@ -101,7 +104,9 @@ public class userService {
                                 startdate,
                                 user.getRole(),
                                 totalDeposits,
-                                totalpayableamt
+                                totalpayableamt,
+                                deposits,
+                        loans
 
                 );
         }

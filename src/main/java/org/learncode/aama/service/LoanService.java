@@ -24,37 +24,52 @@ public class LoanService {
     private NoticeRepo noticeRepo;
     @Autowired
     private DepositService depositService;
+    @Autowired
+    private budgetRepo budgetRepo1;
 
     @Transactional
     public Notice createLoan(Long userId, LoanRequest loanRequest){
         Users users = userRepo.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
+
         // Check if user has any PENDING loan request using the OneToMany relationship
         boolean hasPendingRequest = users.getLoanRequests().stream()
                 .anyMatch(lr -> "pending".equalsIgnoreCase(lr.getStatus()));
+        boolean hasPendingActiveLoans = users.getLoan().stream()
+                .anyMatch(lr -> "ACTIVE".equals(lr.getStatus()));
 
         if (hasPendingRequest) {
             throw new IllegalStateException("User already has a pending loan request. Please wait for approval or rejection.");
         }
+        if (hasPendingActiveLoans) {
+            throw new IllegalStateException("User already has a Active loan. Please clear the previous loan");
+        }
+        BudgetTransaction budget = budgetRepo1.getById(1L);
+        if((loanRequest.getAmount()<=(0.5)*budget.getAvailableBudget())) {
 
-        // Create a new loan request (we keep all history now)
-        loanRequest.setUsers(users);
-        loanRequest.setStatus("pending");
-        LoanRequest savedLoanRequest = loanRequestRepo.save(loanRequest);
+            // Create a new loan request (we keep all history now)
+            loanRequest.setUsers(users);
+            loanRequest.setStatus("pending");
+            LoanRequest savedLoanRequest = loanRequestRepo.save(loanRequest);
 
-        // Add to user's list (optional, but keeps relationship in sync)
-        users.getLoanRequests().add(savedLoanRequest);
-        userRepo.save(users);
+            // Add to user's list (optional, but keeps relationship in sync)
+            users.getLoanRequests().add(savedLoanRequest);
+            userRepo.save(users);
 
-        // Create a notice
-        Notice notice = new Notice();
-        notice.setType("Loan Request for Rs " + savedLoanRequest.getAmount());
-        notice.setPurpose(savedLoanRequest.getPurpose() + "  Status : " + savedLoanRequest.getStatus());
-        notice.setLoanid(savedLoanRequest.getLoanReqId());
-        notice.setNoticeCreator(users.getName());
+            // Create a notice
+            Notice notice = new Notice();
+            notice.setType("Loan Request for Rs " + savedLoanRequest.getAmount());
+            notice.setPurpose(savedLoanRequest.getPurpose() + "  Status : " + savedLoanRequest.getStatus());
+            notice.setLoanid(savedLoanRequest.getLoanReqId());
+            notice.setNoticeCreator(users.getName());
 
-        return notice;
+            return notice;
+        }
+        else {
+            throw new IllegalStateException("The requested amount couldn't be accepted");
+
+        }
     }
 
     public Notice approve(Long loanId,Long adminId){

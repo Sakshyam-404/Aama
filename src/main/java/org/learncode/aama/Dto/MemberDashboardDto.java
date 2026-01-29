@@ -5,7 +5,11 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.learncode.aama.entites.Deposit;
+import org.learncode.aama.entites.Loan;
+
 import java.time.LocalDateTime;
+import java.util.List;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -26,5 +30,7 @@ public class MemberDashboardDto {
     private String role;
     private Double totalDeposit;
     private Double totalpayableamt;
+    private List<Deposit> deposits;
+    private List<Loan> loans;
 
 }
