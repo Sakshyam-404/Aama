@@ -68,6 +68,7 @@ public class LoanService {
             Loan loan= new Loan();
             loan.setPrincipal(loanRequest.getAmount());
             loan.setUsers(loanRequest.getUsers());
+            calculateInterest(loan);
             loanRepo.save(loan);
             noticeByPurpose.setPurpose(loanRequest.getPurpose() + "  Status : " + loanRequest.getStatus());
             noticeByPurpose.setLoanid(loan.getId());
@@ -183,9 +184,23 @@ public class LoanService {
 
         // Save both
         loanRequestRepo.save(loanRequest);
-        depositService.manageLoanrequestforpaid(admin.getUserID(),loanRequest.getAmount());
+        depositService.manageLoanrequestforpaid(admin.getUserID(),loan.getTotalPayable());
         return loanRepo.save(loan);
     }
+
+    private void calculateInterest(Loan loan) {
+        double timeInYears = loan.getDurationMonths() / 12.0;
+
+        double interest = (loan.getPrincipal()
+                * loan.getInterestRate()
+                * timeInYears) / 100;
+
+        loan.setInterestAmount(interest);
+        loan.setTotalPayable(loan.getPrincipal() + interest);
+        loan.setRemainingBalance(loan.getTotalPayable());
+    }
+
+
 
     public List<Loan> getAllLoans() {
         return loanRepo.findAll();

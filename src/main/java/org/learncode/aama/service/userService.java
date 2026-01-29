@@ -85,6 +85,7 @@ public class userService {
                 Double interestRate = firstLoan != null ? firstLoan.getInterestRate() : null;
                 Integer durationMonths = firstLoan != null ? firstLoan.getDurationMonths() : null;
                 LocalDateTime startdate = firstLoan != null ? firstLoan.getStartDate() : null;
+                Double totalpayableamt = firstLoan != null ? firstLoan.getTotalPayable() : null;
 
                 return new MemberDashboardDto(
                                 user.getUserID(),
@@ -99,7 +100,8 @@ public class userService {
                                 durationMonths,
                                 startdate,
                                 user.getRole(),
-                                totalDeposits
+                                totalDeposits,
+                                totalpayableamt
 
                 );
         }

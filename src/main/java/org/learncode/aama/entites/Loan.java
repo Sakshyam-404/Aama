@@ -21,6 +21,8 @@ public class Loan {
     private Users users;
 
     private Double principal;
+    private Double interestAmount;
+    private Double totalPayable;
     private Double interestRate=5.0;
     private Integer durationMonths=1;
     private LocalDateTime startDate = LocalDateTime.now();

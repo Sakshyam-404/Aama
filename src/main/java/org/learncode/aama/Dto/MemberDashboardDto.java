@@ -25,5 +25,6 @@ public class MemberDashboardDto {
     private LocalDateTime startdate;
     private String role;
     private Double totalDeposit;
+    private Double totalpayableamt;
 
 }
